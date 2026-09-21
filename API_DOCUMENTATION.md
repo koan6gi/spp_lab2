@@ -55,8 +55,8 @@ Single table `notes`:
   1. `multipart/form-data` (when uploading an image file):
      - `title`: string (Required, non-empty)
      - `text`: string (Optional)
-     - `image`: binary file (Optional, restricted to 1 image file)
-  2. `application/json` (when no image file is being uploaded):
+     - `image`: binary file (Optional, restricted to 1 image file, max 20 MB)
+  2. `application/json` (when no image file is being uploaded, body max 20 MB):
      - Payload:
        ```json
        {
@@ -220,6 +220,7 @@ setNotes(prev =>       setNotes(prev =>       setNotes(prev =>
 | `200 OK` | Request succeeded | `GET /api/notes`, `PUT /api/notes/:id` |
 | `201 Created` | Resource created | `POST /api/notes` |
 | `204 No Content` | Resource deleted | `DELETE /api/notes/:id` |
-| `400 Bad Request` | Validation failure | Missing title, empty title, invalid file type, upload limit exceeded |
+| `400 Bad Request` | Validation failure | Missing title, empty title, invalid file type, upload size exceeded |
 | `404 Not Found` | Resource missing | Attempting to update or delete a non-existent note ID |
+| `413 Payload Too Large` | Size limit exceeded | Request body or uploaded file exceeds 20 MB |
 | `500 Server Error` | Unhandled failure | Database connection failure, unexpected system fault |

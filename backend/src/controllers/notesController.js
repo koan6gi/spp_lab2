@@ -9,7 +9,7 @@ const getNotes = async (req, res) => {
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error fetching notes:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: error.message || 'Internal server error.' });
   }
 };
 
@@ -38,7 +38,7 @@ const createNote = async (req, res) => {
       await deleteFile(req.file.filename);
     }
     console.error('Error creating note:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: error.message || 'Internal server error.' });
   }
 };
 
@@ -86,7 +86,7 @@ const updateNote = async (req, res) => {
       await deleteFile(req.file.filename);
     }
     console.error('Error updating note:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: error.message || 'Internal server error.' });
   }
 };
 
@@ -108,7 +108,7 @@ const deleteNote = async (req, res) => {
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting note:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: error.message || 'Internal server error.' });
   }
 };
 

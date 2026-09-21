@@ -13,6 +13,14 @@ export default function NoteForm({ onNoteCreated, onError }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 20 * 1024 * 1024) {
+      onError('File size exceeds the 20 MB limit.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
     setImageFile(file);
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);

@@ -11,8 +11,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(requestLogger);
 
 app.use('/uploads', express.static(UPLOADS_DIR));
@@ -25,13 +25,19 @@ app.use('/api/notes', notesRoutes);
 
 app.use((err, req, res, next) => {
   if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'File size exceeds the 20 MB limit.' });
+    }
     return res.status(400).json({ error: err.message });
+  }
+  if (err.type === 'entity.too.large' || err.status === 413) {
+    return res.status(413).json({ error: 'Payload exceeds the 20 MB limit.' });
   }
   if (err.message === 'Only image files are allowed.') {
     return res.status(400).json({ error: err.message });
   }
   console.error('Unhandled application error:', err);
-  res.status(500).json({ error: 'Internal server error.' });
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error.' });
 });
 
 const start = async () => {
