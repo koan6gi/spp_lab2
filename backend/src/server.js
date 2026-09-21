@@ -40,10 +40,43 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal server error.' });
 });
 
+let server;
+
+const shutdown = (signal) => {
+  console.log(`Received ${signal}, starting graceful shutdown...`);
+
+  const forceTimeout = setTimeout(() => {
+    console.error('Shutdown timed out, terminating process.');
+    process.exit(1);
+  }, 4000);
+
+  if (server) {
+    if (typeof server.closeIdleConnections === 'function') {
+      server.closeIdleConnections();
+    }
+    server.close(async () => {
+      clearTimeout(forceTimeout);
+      try {
+        const { pool } = require('./config/db');
+        await pool.end();
+      } catch (err) {
+        console.error('Error closing database pool:', err);
+      }
+      process.exit(0);
+    });
+  } else {
+    clearTimeout(forceTimeout);
+    process.exit(0);
+  }
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 const start = async () => {
   try {
     await initDb();
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
   } catch (error) {
