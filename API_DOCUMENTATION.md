@@ -163,7 +163,7 @@ The client performs all UI updates in memory without reloading the page or refet
 
 ```
 +-------------------------------------------------------------+
-|                     Client Action                          |
+|                      Client Action                          |
 +-------------------------------------------------------------+
                               |
        +----------------------+----------------------+
