@@ -1,12 +1,18 @@
 const nodemailer = require('nodemailer');
 const { logger } = require('./logger');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'localhost',
-  port: parseInt(process.env.SMTP_PORT || '1025', 10),
-  secure: false,
-  ignoreTLS: true,
-});
+const isTest = process.env.NODE_ENV === 'test';
+
+const transporter = isTest
+  ? nodemailer.createTransport({
+      jsonTransport: true,
+    })
+  : nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'localhost',
+      port: parseInt(process.env.SMTP_PORT || '1025', 10),
+      secure: false,
+      ignoreTLS: true,
+    });
 
 const sendPasswordResetEmail = async (toEmail, token) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';

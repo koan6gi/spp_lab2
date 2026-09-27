@@ -266,7 +266,7 @@ const refresh = async (req, res) => {
     );
 
     res.status(200).json({ accessToken });
-  } catch (error) {
+  } catch {
     res.status(401).json({
       error: 'Invalid or expired refresh token.',
       code: 'INVALID_REFRESH_TOKEN',
@@ -381,7 +381,11 @@ const forgotPassword = async (req, res) => {
         [user.id, tokenHash]
       );
 
-      await sendPasswordResetEmail(user.email, rawToken);
+      try {
+        await sendPasswordResetEmail(user.email, rawToken);
+      } catch (mailError) {
+        logger.error({ email: user.email, error: mailError.message }, 'Failed to dispatch reset email');
+      }
     }
 
     res.status(200).json({

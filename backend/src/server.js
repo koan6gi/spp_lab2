@@ -30,7 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/notes', notesRoutes);
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   if (err.name === 'MulterError') {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: 'File size exceeds the 20 MB limit.', code: 'FILE_TOO_LARGE' });

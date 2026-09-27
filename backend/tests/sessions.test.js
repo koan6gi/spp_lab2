@@ -37,6 +37,7 @@ describe('Active Sessions API', () => {
     expect(session).toHaveProperty('last_active_at');
     expect(session).toHaveProperty('created_at');
     expect(session).toHaveProperty('isCurrent');
+    expect(res.body.some((s) => s.id === sessionId)).toBe(true);
   });
 
   it('should revoke a session by ID (200)', async () => {
