@@ -62,4 +62,5 @@ On every push/pull-request, `.github/workflows/ci.yml` spins up a PostgreSQL ser
 
 ## Documentation Links
 - [USER_WORKFLOW.md](./USER_WORKFLOW.md): Complete guide to user journeys, RBAC matrix, sessions, and password recovery.
-- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md): Detailed REST endpoints, payload schemas, and HTTP status code definitions.
+- **Interactive Swagger UI**: Available directly at `http://localhost:5000/api/docs` when the backend is running.
+
