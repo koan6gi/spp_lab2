@@ -17,6 +17,14 @@ services:
       timeout: 5s
       retries: 5
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: notes_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   backend:
     build:
       context: ./backend
@@ -30,6 +38,11 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: notes_db
+      JWT_ACCESS_SECRET: default_jwt_access_secret_key_change_in_prod
+      JWT_REFRESH_SECRET: default_jwt_refresh_secret_key_change_in_prod
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "5000:5000"
     volumes:
@@ -37,6 +50,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   frontend:
     build:

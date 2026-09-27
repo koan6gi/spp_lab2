@@ -1,25 +1,21 @@
-# Minimalist Notes SPA (Google Keep Clone)
+# Minimalist Notes SPA (Laboratory Work #2 & #3)
 
-A lightweight, responsive single-page note-taking application built with React (Vite + Tailwind CSS), Node.js (Express), PostgreSQL, and Docker Compose.
-
----
-
-## Features
-- **Responsive Masonry Grid**: Note cards automatically adjust to screen width.
-- **Image Attachments**: Upload one image per note with client preview, in-place replacement, or removal.
-- **Clean In-Memory Updates**: Reactive DOM updates without full-page reloads.
-- **Modals**: Edit note modal and confirmation dialog for note deletion.
-- **Toasts**: Floating alert notifications for success and error states.
-- **RESTful API**: Standardized JSON/Multipart endpoints with proper HTTP status codes.
-- **Containerized**: Production-ready `docker-compose.yml` with health checks and volume persistence.
+A secure, responsive single-page note-taking application built with React (Vite + Tailwind CSS), Node.js (Express), PostgreSQL, Mailpit, and Docker Compose.
 
 ---
 
-## Tech Stack
-- **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Nginx
-- **Backend**: Node.js 20, Express 4, Multer, `pg` (PostgreSQL client), CORS
-- **Database**: PostgreSQL 16
-- **DevOps**: Docker, Docker Compose
+## Key Features
+
+- **Role-Based Access Control (RBAC)**: 3 distinct roles (`user`, `moderator`, `admin`) enforced on both backend and frontend.
+- **Temporary Key Authentication**: Dual-token model with short-lived JWT Access Tokens (15m) and persistent Refresh Tokens (7d).
+- **Brute-Force Defense**: IP-based rate limiting + 5-attempt account lockout for 15 minutes returning HTTP `429 Too Many Requests`.
+- **Active Session Management**: Audit and revoke active sessions/devices, or log out everywhere else.
+- **Email Password Recovery**: Integrated local SMTP testing server (**Mailpit**) with interactive web UI.
+- **Structured JSON Logging**: Production-ready structured logging with **Pino**, including correlation IDs (`x-request-id`) and request latency.
+- **Interactive Swagger Documentation**: Full OpenAPI 3.0 specification served directly at `/api/docs`.
+- **Automated CI Verification**: GitHub Actions workflow (`.github/workflows/ci.yml`) running ESLint and Jest/Supertest integration test suites.
+- **20 MB Media Uploads**: Multer file uploads with strict size limits, instant client previews, and disk cleanup.
+- **Responsive Masonry Grid**: Google Keep-style card layout with reactive, zero-reload state updates.
 
 ---
 
@@ -30,47 +26,40 @@ A lightweight, responsive single-page note-taking application built with React (
 docker compose up --build
 ```
 
-### 2. Access the Application
-- **Frontend (Web UI)**: [http://localhost:3000](http://localhost:3000)
+### 2. Service Endpoints
+- **Frontend Web UI**: [http://localhost:3000](http://localhost:3000)
 - **Backend API**: [http://localhost:5000/api/notes](http://localhost:5000/api/notes)
+- **Swagger UI Documentation**: [http://localhost:5000/api/docs](http://localhost:5000/api/docs)
+- **Mailpit Web UI (Password Reset Inbox)**: [http://localhost:8025](http://localhost:8025)
 - **PostgreSQL**: `localhost:5432` (`notes_db` / `postgres` / `postgres`)
 
-### 3. Stopping Services
-```bash
-docker compose down
-```
-To also remove stored volume data:
-```bash
-docker compose down -v
-```
+### 3. Demo Accounts
+The database automatically seeds three accounts upon first startup:
+- **Admin**: `admin@example.com` / `Password123!`
+- **Moderator**: `moderator@example.com` / `Password123!`
+- **Regular User**: `user@example.com` / `Password123!`
 
 ---
 
-## Local Development (Without Docker)
+## Automated Verification & Testing
 
-### Prerequisites
-- Node.js 20+
-- Running PostgreSQL instance
-
-### 1. Setup Backend
+### Running Tests Locally (Backend)
 ```bash
 cd backend
-npm install
-cp .env.example .env
-# Adjust credentials in .env if needed
-npm run dev
+npm test
 ```
-Backend runs on [http://localhost:5000](http://localhost:5000).
 
-### 2. Setup Frontend
+### Running Linter
 ```bash
-cd frontend
-npm install
-npm run dev
+cd backend
+npm run lint
 ```
-Frontend runs on [http://localhost:3000](http://localhost:3000) and automatically proxies `/api` and `/uploads` to `http://localhost:5000`.
+
+### GitHub Actions CI
+On every push/pull-request, `.github/workflows/ci.yml` spins up a PostgreSQL service container, runs ESLint, executes the Jest test suites, and verifies the frontend build.
 
 ---
 
-## API Documentation
-For complete schema details, payload structures, update logic, and reactive flow, refer to [API_DOCUMENTATION.md](./API_DOCUMENTATION.md).
+## Documentation Links
+- [USER_WORKFLOW.md](./USER_WORKFLOW.md): Complete guide to user journeys, RBAC matrix, sessions, and password recovery.
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md): Detailed REST endpoints, payload schemas, and HTTP status code definitions.
