@@ -49,6 +49,23 @@ function NotesApp() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleRevoked = () => {
+      addToast('Your session was revoked from another device. Please log in again.', 'error');
+    };
+    window.addEventListener('auth_session_revoked', handleRevoked);
+    return () => window.removeEventListener('auth_session_revoked', handleRevoked);
+  }, [addToast]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSessionsModalOpen(false);
+      setAdminModalOpen(false);
+      setEditingNote(null);
+      setDeletingNoteId(null);
+    }
+  }, [isAuthenticated]);
+
   const loadNotes = useCallback(async () => {
     if (!isAuthenticated) {
       setNotes([]);

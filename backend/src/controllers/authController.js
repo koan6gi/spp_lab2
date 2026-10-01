@@ -334,7 +334,7 @@ const revokeSession = async (req, res) => {
 };
 
 const revokeOtherSessions = async (req, res) => {
-  const currentSessionId = req.body.currentSessionId || null;
+  const currentSessionId = req.body.currentSessionId || req.user?.sessionId || null;
 
   try {
     if (currentSessionId) {

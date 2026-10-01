@@ -26,10 +26,6 @@ describe('Role-Based Access Control (RBAC) API', () => {
     userToken = userLogin.body.accessToken;
   });
 
-  afterAll(async () => {
-    await db.pool.end();
-  });
-
   it('should deny unauthenticated requests to /api/users (401)', async () => {
     const res = await request(app).get('/api/users');
     expect(res.status).toBe(401);

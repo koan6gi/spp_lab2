@@ -47,12 +47,25 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     };
 
+    const handleStorageChange = (e) => {
+      if (e.key === 'notes_access_token' && !e.newValue) {
+        setToken(null);
+        setUser(null);
+      }
+    };
+
     window.addEventListener('auth_logout', handleAuthLogout);
-    return () => window.removeEventListener('auth_logout', handleAuthLogout);
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('auth_logout', handleAuthLogout);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
-    if (token && !user) {
+    if (!token) return;
+
+    if (!user) {
       getMe()
         .then((userData) => {
           setUser(userData);
@@ -62,6 +75,24 @@ export const AuthProvider = ({ children }) => {
           logout();
         });
     }
+
+    const verifyActiveSession = async () => {
+      try {
+        await getMe();
+      } catch (err) {
+        if (err.status === 401 || err.code === 'SESSION_REVOKED') {
+          logout();
+        }
+      }
+    };
+
+    const interval = setInterval(verifyActiveSession, 4000);
+    window.addEventListener('focus', verifyActiveSession);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', verifyActiveSession);
+    };
   }, [token, user, logout]);
 
   const value = {

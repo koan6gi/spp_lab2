@@ -31,6 +31,14 @@ const handleAuthResponse = async (response) => {
       else errorMessage = `Request failed (${response.status})`;
     }
 
+    if (response.status === 401 && (errorCode === 'SESSION_REVOKED' || errorCode === 'USER_NOT_FOUND')) {
+      localStorage.removeItem('notes_access_token');
+      localStorage.removeItem('notes_refresh_token');
+      localStorage.removeItem('notes_user');
+      window.dispatchEvent(new CustomEvent('auth_session_revoked'));
+      window.dispatchEvent(new Event('auth_logout'));
+    }
+
     const err = new Error(errorMessage);
     err.code = errorCode;
     err.status = response.status;

@@ -82,6 +82,29 @@ const apiRequest = async (url, options = {}) => {
     let response = await fetch(url, { ...options, headers });
 
     if (response.status === 401) {
+      let isRevoked = false;
+      try {
+        const cloned = response.clone();
+        const data = await cloned.json();
+        if (data.code === 'SESSION_REVOKED') {
+          isRevoked = true;
+        }
+      } catch {
+        // Ignored
+      }
+
+      if (isRevoked) {
+        localStorage.removeItem('notes_access_token');
+        localStorage.removeItem('notes_refresh_token');
+        localStorage.removeItem('notes_user');
+        window.dispatchEvent(new CustomEvent('auth_session_revoked'));
+        window.dispatchEvent(new Event('auth_logout'));
+        const err = new Error('Session has been revoked or expired.');
+        err.status = 401;
+        err.code = 'SESSION_REVOKED';
+        throw err;
+      }
+
       const storedRefreshToken = localStorage.getItem('notes_refresh_token');
       if (storedRefreshToken) {
         try {
@@ -95,8 +118,13 @@ const apiRequest = async (url, options = {}) => {
           localStorage.removeItem('notes_access_token');
           localStorage.removeItem('notes_refresh_token');
           localStorage.removeItem('notes_user');
+          window.dispatchEvent(new CustomEvent('auth_session_revoked'));
           window.dispatchEvent(new Event('auth_logout'));
         }
+      } else {
+        localStorage.removeItem('notes_access_token');
+        localStorage.removeItem('notes_user');
+        window.dispatchEvent(new Event('auth_logout'));
       }
     }
 

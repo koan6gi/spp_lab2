@@ -13,7 +13,6 @@ describe('Authentication & Security API', () => {
 
   afterAll(async () => {
     await db.pool.query('DELETE FROM users WHERE email LIKE $1', ['test_%']);
-    await db.pool.end();
   });
 
   it('should register a new user successfully (201)', async () => {

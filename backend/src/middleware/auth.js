@@ -16,10 +16,24 @@ const authenticate = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_ACCESS_SECRET);
-    const userRes = await db.query(
-      'SELECT id, email, role, is_blocked FROM users WHERE id = $1',
-      [decoded.userId]
-    );
+
+    let query;
+    let params;
+    if (decoded.sessionId) {
+      query = `
+        SELECT u.id, u.email, u.role, u.is_blocked, 
+               s.id AS session_id, s.is_revoked, s.expires_at
+        FROM users u
+        LEFT JOIN sessions s ON s.id = $2 AND s.user_id = u.id
+        WHERE u.id = $1
+      `;
+      params = [decoded.userId, decoded.sessionId];
+    } else {
+      query = 'SELECT id, email, role, is_blocked FROM users WHERE id = $1';
+      params = [decoded.userId];
+    }
+
+    const userRes = await db.query(query, params);
 
     if (userRes.rows.length === 0) {
       return res.status(401).json({
@@ -37,8 +51,19 @@ const authenticate = async (req, res, next) => {
       });
     }
 
+    if (decoded.sessionId) {
+      if (!user.session_id || user.is_revoked || new Date(user.expires_at) < new Date()) {
+        return res.status(401).json({
+          error: 'Session has been revoked or expired. Please log in again.',
+          code: 'SESSION_REVOKED',
+        });
+      }
+    }
+
     req.user = {
-      ...user,
+      id: user.id,
+      email: user.email,
+      role: user.role,
       sessionId: decoded.sessionId || null,
     };
     next();

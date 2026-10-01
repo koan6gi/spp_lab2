@@ -21,10 +21,6 @@ describe('Notes CRUD & RBAC Ownership API', () => {
     modToken = modLogin.body.accessToken;
   });
 
-  afterAll(async () => {
-    await db.pool.end();
-  });
-
   it('should create a note for user (201)', async () => {
     const res = await request(app)
       .post('/api/notes')

@@ -17,10 +17,6 @@ describe('Active Sessions API', () => {
     sessionId = loginRes.body.sessionId;
   });
 
-  afterAll(async () => {
-    await db.pool.end();
-  });
-
   it('should list active sessions for the current user including created_at (200)', async () => {
     const res = await request(app)
       .get('/api/auth/sessions')
@@ -46,6 +42,7 @@ describe('Active Sessions API', () => {
       .send({ email: 'user@example.com', password: 'Password123!' });
 
     const secondSessionId = secondLogin.body.sessionId;
+    const secondAccessToken = secondLogin.body.accessToken;
 
     const res = await request(app)
       .delete(`/api/auth/sessions/${secondSessionId}`)
@@ -53,5 +50,12 @@ describe('Active Sessions API', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Session revoked successfully.');
+
+    const checkRes = await request(app)
+      .get('/api/notes')
+      .set('Authorization', `Bearer ${secondAccessToken}`);
+
+    expect(checkRes.status).toBe(401);
+    expect(checkRes.body.code).toBe('SESSION_REVOKED');
   });
 });
